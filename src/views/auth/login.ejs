@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'Log in' }) %></head>
+<body>
+  <div class="auth-wrap card">
+    <h1>Log in</h1>
+    <% if (error) { %><div class="error"><%= error %></div><% } %>
+    <form method="POST" action="/login">
+      <label for="username">Username or email</label>
+      <input type="text" id="username" name="username" required autofocus>
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+      <label><input type="checkbox" name="remember" value="1" style="width:auto;display:inline-block;margin-right:0.4rem;"> Remember me</label>
+      <button type="submit">Log in</button>
+    </form>
+    <p class="muted">Registration is invite-only. Ask an admin for an invite link.</p>
+  </div>
+</body>
+</html>

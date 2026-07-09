@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: template.name }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="container">
+    <h1>Edit template</h1>
+
+    <div class="card">
+      <form method="POST" action="/templates/<%= template.id %>" class="form-row">
+        <input type="text" name="name" value="<%= template.name %>" required>
+        <button type="submit" class="secondary">Rename</button>
+      </form>
+      <form method="POST" action="/templates/<%= template.id %>/delete" onsubmit="return confirm('Delete this template? Logged workouts are kept.');">
+        <button type="submit" class="danger">Delete template</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Exercises</h2>
+      <% if (templateExercises.length === 0) { %><p class="muted">No exercises yet — add one below.</p><% } %>
+      <% templateExercises.forEach((te, idx) => { %>
+        <div class="exercise-row">
+          <div style="flex:1;">
+            <strong><%= te.exercise_name %></strong>
+            <span class="tag"><%= te.category %></span>
+            <div class="muted"><%= te.target_sets %> × <%= te.target_rep_low || '?' %>–<%= te.target_rep_high || '?' %><%= te.notes ? ' · ' + te.notes : '' %></div>
+          </div>
+          <form class="inline-form" method="POST" action="/templates/<%= template.id %>/exercises/<%= te.id %>/move">
+            <input type="hidden" name="direction" value="up">
+            <button type="submit" class="secondary" <%= idx === 0 ? 'disabled' : '' %>>↑</button>
+          </form>
+          <form class="inline-form" method="POST" action="/templates/<%= template.id %>/exercises/<%= te.id %>/move">
+            <input type="hidden" name="direction" value="down">
+            <button type="submit" class="secondary" <%= idx === templateExercises.length - 1 ? 'disabled' : '' %>>↓</button>
+          </form>
+          <details>
+            <summary class="muted" style="cursor:pointer;">Edit</summary>
+            <form method="POST" action="/templates/<%= template.id %>/exercises/<%= te.id %>" style="margin-top:0.5rem;">
+              <div class="form-row">
+                <div><label>Sets</label><input type="number" name="target_sets" value="<%= te.target_sets %>" min="1"></div>
+                <div><label>Rep low</label><input type="number" name="target_rep_low" value="<%= te.target_rep_low || '' %>" min="0"></div>
+                <div><label>Rep high</label><input type="number" name="target_rep_high" value="<%= te.target_rep_high || '' %>" min="0"></div>
+              </div>
+              <label>Notes</label>
+              <input type="text" name="notes" value="<%= te.notes || '' %>">
+              <button type="submit" class="secondary">Save</button>
+            </form>
+          </details>
+          <form class="inline-form" method="POST" action="/templates/<%= template.id %>/exercises/<%= te.id %>/delete" onsubmit="return confirm('Remove this exercise from the template?');">
+            <button type="submit" class="danger">Remove</button>
+          </form>
+        </div>
+      <% }) %>
+    </div>
+
+    <div class="card">
+      <h2>Add exercise</h2>
+      <form method="POST" action="/templates/<%= template.id %>/exercises">
+        <label>Exercise</label>
+        <select name="exercise_id" required>
+          <% exercises.forEach(ex => { %>
+            <option value="<%= ex.id %>"><%= ex.name %> (<%= ex.category %>)</option>
+          <% }) %>
+        </select>
+        <div class="form-row">
+          <div><label>Sets</label><input type="number" name="target_sets" value="3" min="1"></div>
+          <div><label>Rep low</label><input type="number" name="target_rep_low" min="0"></div>
+          <div><label>Rep high</label><input type="number" name="target_rep_high" min="0"></div>
+        </div>
+        <label>Notes</label>
+        <input type="text" name="notes" placeholder="optional, e.g. @30lb">
+        <button type="submit">Add exercise</button>
+      </form>
+      <p class="muted">Don't see the exercise you need? <a href="/exercises">Add it to the shared database</a>.</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'Weight' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="container">
+    <h1>Body weight</h1>
+
+    <div class="card">
+      <h2>Log weigh-in</h2>
+      <form method="POST" action="/weight" class="form-row">
+        <input type="date" name="date" value="<%= today %>">
+        <input type="number" step="0.1" name="weight" placeholder="lbs" required>
+        <button type="submit">Log</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Goal</h2>
+      <form method="POST" action="/weight/goal" class="form-row">
+        <input type="number" step="0.1" name="goal_weight" placeholder="goal weight (lbs)" value="<%= goalWeight || '' %>">
+        <button type="submit" class="secondary">Save goal</button>
+      </form>
+      <% if (latest) { %>
+        <div class="stat-row"><span>Current (7-day avg)</span><span><%= latest.avg.toFixed(1) %> lbs</span></div>
+        <div class="stat-row"><span>Trend</span><span><%= trendPerWeek != null ? (trendPerWeek > 0 ? '+' : '') + trendPerWeek.toFixed(2) + ' lb/wk' : '—' %></span></div>
+        <% if (projection) { %>
+          <div class="stat-row"><span>Projected to reach goal</span><span><%= projection.date %> (~<%= projection.weeksLeft.toFixed(1) %> wks)</span></div>
+        <% } %>
+      <% } %>
+    </div>
+
+    <% if (chartData.length > 1) { %>
+      <div class="card">
+        <h2>Trend</h2>
+        <canvas id="weightChart" height="220"></canvas>
+      </div>
+    <% } %>
+
+    <div class="card">
+      <h2>History</h2>
+      <% if (entries.length === 0) { %><p class="muted">No weigh-ins logged.</p><% } %>
+      <table>
+        <tr><th>Date</th><th>Weight</th><th>7-day avg</th><th></th></tr>
+        <% entries.forEach(e => { %>
+          <tr>
+            <td class="muted"><%= e.date %></td>
+            <td><%= e.weight %></td>
+            <td><%= e.avg.toFixed(1) %></td>
+            <td>
+              <form method="POST" action="/weight/<%= e.id %>/delete" onsubmit="return confirm('Delete this entry?');">
+                <button type="submit" class="danger">✕</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
+  </div>
+
+  <% if (chartData.length > 1) { %>
+    <script src="/vendor/chartjs/chart.umd.js"></script>
+    <script>
+      const data = <%- JSON.stringify(chartData) %>;
+      new Chart(document.getElementById('weightChart'), {
+        type: 'line',
+        data: {
+          labels: data.map(d => d.date),
+          datasets: [
+            { label: 'Weight', data: data.map(d => d.weight), borderColor: '#4f8cff', pointRadius: 2, tension: 0.1 },
+            { label: '7-day avg', data: data.map(d => d.avg), borderColor: '#38c977', pointRadius: 0, tension: 0.3 },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: { x: { ticks: { color: '#9aa0a8' } }, y: { ticks: { color: '#9aa0a8' } } },
+          plugins: { legend: { labels: { color: '#e8eaed' } } },
+        },
+      });
+    </script>
+  <% } %>
+</body>
+</html>

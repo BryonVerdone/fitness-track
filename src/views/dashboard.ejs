@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('partials/head', { title: 'Dashboard' }) %></head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="container">
+    <h1>Welcome back, <%= user.username %></h1>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Today's macros (<%= profile %>)</h2>
+        <% if (target) { %>
+          <% const rows = [
+            { label: 'Calories', have: macroTotals.calories, target: target.calories },
+            { label: 'Protein', have: macroTotals.protein, target: target.protein },
+          ]; %>
+          <% rows.forEach(r => { const pct = r.target > 0 ? (r.have / r.target) * 100 : 0; %>
+            <div class="stat-row"><span><%= r.label %></span><span><%= Math.round(r.have) %> / <%= Math.round(r.target) %></span></div>
+            <div class="progress <%= pct > 100 ? 'over' : '' %>"><div style="width: <%= Math.min(pct, 100) %>%;"></div></div>
+          <% }) %>
+        <% } %>
+        <a href="/macros">Log food →</a>
+      </div>
+
+      <div class="card">
+        <h2>Last workout</h2>
+        <% if (lastWorkoutSummary) { %>
+          <p><strong><%= lastWorkoutSummary.name %></strong> · <%= lastWorkoutSummary.performed_at.slice(0,10) %></p>
+          <p class="muted"><%= lastWorkoutSummary.exCount %> exercises · <%= lastWorkoutSummary.setCount %> sets</p>
+          <a href="/workouts/<%= lastWorkoutSummary.id %>/log">View →</a>
+        <% } else { %>
+          <p class="muted">No workouts logged yet.</p>
+        <% } %>
+        <p><a href="/workouts">Start a workout →</a></p>
+      </div>
+
+      <div class="card">
+        <h2>Weight trend</h2>
+        <% if (weightTrend) { %>
+          <div class="stat-row"><span>Latest</span><span><%= weightTrend.current %> lbs</span></div>
+          <div class="stat-row"><span>7-day avg</span><span><%= weightTrend.avg.toFixed(1) %> lbs</span></div>
+        <% } else { %>
+          <p class="muted">No weigh-ins logged yet.</p>
+        <% } %>
+        <a href="/weight">Log weight →</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Last 7 days</h2>
+      <div class="stat-row"><span>Avg calories</span><span><%= weeklySummary.avgCalories %></span></div>
+      <div class="stat-row"><span>Avg protein</span><span><%= weeklySummary.avgProtein %> g</span></div>
+      <div class="stat-row"><span>Workouts completed</span><span><%= weeklySummary.workouts %></span></div>
+      <div class="stat-row"><span>Miles run/walked/biked</span><span><%= weeklySummary.miles.toFixed(1) %></span></div>
+      <div class="stat-row"><span>Weight change</span><span><%= weeklySummary.weightChange != null ? (weeklySummary.weightChange > 0 ? '+' : '') + weeklySummary.weightChange.toFixed(1) + ' lbs' : '—' %></span></div>
+    </div>
+
+    <p><a href="/charts">View progression charts →</a></p>
+  </div>
+</body>
+</html>

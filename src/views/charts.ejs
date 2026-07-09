@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('partials/head', { title: 'Charts' }) %></head>
+<body>
+  <%- include('partials/nav') %>
+  <div class="container">
+    <h1>Progression charts</h1>
+    <p class="muted">Weight trend lives on the <a href="/weight">Weight page</a>. Weekly mileage lives on <a href="/cardio">Cardio</a>.</p>
+
+    <div class="card">
+      <h2>Pace vs. RPE (runs &amp; walks)</h2>
+      <% if (paceRpe.length > 1) { %>
+        <canvas id="paceRpeChart" height="220"></canvas>
+      <% } else { %>
+        <p class="muted">Log a few runs/walks to see this trend.</p>
+      <% } %>
+    </div>
+
+    <div class="card">
+      <h2>Exercise progression</h2>
+      <% if (exercisesLogged.length === 0) { %>
+        <p class="muted">Log a workout to see progression here.</p>
+      <% } else { %>
+        <form method="GET" action="/charts">
+          <select name="exercise_id" onchange="this.form.submit()">
+            <% exercisesLogged.forEach(ex => { %>
+              <option value="<%= ex.id %>" <%= ex.id === selectedExerciseId ? 'selected' : '' %>><%= ex.name %></option>
+            <% }) %>
+          </select>
+        </form>
+        <% if (progression.length > 1) { %>
+          <canvas id="progressionChart" height="220"></canvas>
+        <% } else { %>
+          <p class="muted">Not enough logged sets yet for this exercise.</p>
+        <% } %>
+      <% } %>
+    </div>
+  </div>
+
+  <script src="/vendor/chartjs/chart.umd.js"></script>
+  <script>
+    const paceRpe = <%- JSON.stringify(paceRpe) %>;
+    if (paceRpe.length > 1) {
+      new Chart(document.getElementById('paceRpeChart'), {
+        type: 'line',
+        data: {
+          labels: paceRpe.map(d => d.date),
+          datasets: [
+            { label: 'Pace (min/mi)', data: paceRpe.map(d => d.pace), borderColor: '#4f8cff', yAxisID: 'y', tension: 0.2 },
+            { label: 'RPE', data: paceRpe.map(d => d.rpe), borderColor: '#d9a441', yAxisID: 'y1', tension: 0.2 },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { ticks: { color: '#9aa0a8' } },
+            y: { position: 'left', ticks: { color: '#9aa0a8' }, title: { display: true, text: 'min/mi', color: '#9aa0a8' } },
+            y1: { position: 'right', min: 0, max: 10, ticks: { color: '#9aa0a8' }, grid: { drawOnChartArea: false }, title: { display: true, text: 'RPE', color: '#9aa0a8' } },
+          },
+          plugins: { legend: { labels: { color: '#e8eaed' } } },
+        },
+      });
+    }
+
+    const progression = <%- JSON.stringify(progression) %>;
+    if (progression.length > 1) {
+      new Chart(document.getElementById('progressionChart'), {
+        type: 'line',
+        data: {
+          labels: progression.map(d => d.date.slice(0,10)),
+          datasets: [
+            { label: 'Best set weight', data: progression.map(d => d.weight), borderColor: '#4f8cff', yAxisID: 'y', tension: 0.2 },
+            { label: 'Reps', data: progression.map(d => d.reps), borderColor: '#38c977', yAxisID: 'y1', tension: 0.2 },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { ticks: { color: '#9aa0a8' } },
+            y: { position: 'left', ticks: { color: '#9aa0a8' } },
+            y1: { position: 'right', ticks: { color: '#9aa0a8' }, grid: { drawOnChartArea: false } },
+          },
+          plugins: { legend: { labels: { color: '#e8eaed' } } },
+        },
+      });
+    }
+  </script>
+</body>
+</html>

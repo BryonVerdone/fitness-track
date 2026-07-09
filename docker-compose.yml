@@ -1,0 +1,26 @@
+services:
+  fitness-track:
+    build: .
+    container_name: fitness-track
+    restart: unless-stopped
+    ports:
+      - "8085:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_PATH=/data/fitness.db
+      - SESSION_SECRET=${SESSION_SECRET}
+    volumes:
+      - ./data:/data
+
+  # Example only — uncomment and configure to run cloudflared alongside the app.
+  # Points at the app over plain HTTP; Cloudflare terminates TLS.
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: fitness-track-cloudflared
+  #   restart: unless-stopped
+  #   command: tunnel --no-autoupdate run
+  #   environment:
+  #     - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+  #   depends_on:
+  #     - fitness-track

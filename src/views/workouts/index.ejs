@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'Workouts' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="container">
+    <h1>Workouts</h1>
+
+    <div class="card">
+      <h2>Start a workout</h2>
+      <div class="exercise-row">
+        <% templates.forEach(t => { %>
+          <a class="btn" href="/workouts/start/<%= t.id %>"><%= t.name %></a>
+        <% }) %>
+        <a class="btn secondary" href="/workouts/start-blank">Blank / ad-hoc</a>
+      </div>
+      <p class="muted"><a href="/templates">Manage templates</a></p>
+    </div>
+
+    <div class="card">
+      <h2>History</h2>
+      <% if (workouts.length === 0) { %><p class="muted">No workouts logged yet.</p><% } %>
+      <table>
+        <tr><th>Date</th><th>Workout</th><th></th></tr>
+        <% workouts.forEach(w => { %>
+          <tr>
+            <td class="muted"><%= w.performed_at.slice(0, 10) %></td>
+            <td><%= w.name %></td>
+            <td><a href="/workouts/<%= w.id %>/log">View / edit</a></td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

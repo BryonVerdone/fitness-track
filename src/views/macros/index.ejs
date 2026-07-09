@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'Macros' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="container">
+    <h1>Macros</h1>
+
+    <div class="card">
+      <form method="GET" action="/macros" class="form-row">
+        <input type="date" name="date" value="<%= date %>" onchange="this.form.submit()">
+      </form>
+      <form method="POST" action="/macros/day-profile" class="form-row" style="margin-top:0.5rem;">
+        <input type="hidden" name="date" value="<%= date %>">
+        <select name="profile" onchange="this.form.submit()">
+          <option value="training" <%= profile === 'training' ? 'selected' : '' %>>Training day</option>
+          <option value="rest" <%= profile === 'rest' ? 'selected' : '' %>>Rest day</option>
+        </select>
+        <noscript><button type="submit" class="secondary">Set</button></noscript>
+      </form>
+      <p class="muted"><a href="/macros/targets">Edit targets</a></p>
+    </div>
+
+    <div class="card">
+      <h2>Today vs target (<%= profile %>)</h2>
+      <% const rows = [
+        { label: 'Calories', have: totals.calories, target: target.calories },
+        { label: 'Protein', have: totals.protein, target: target.protein },
+        { label: 'Carbs', have: totals.carbs, target: target.carbs },
+        { label: 'Fat', have: totals.fat, target: target.fat },
+      ]; %>
+      <% rows.forEach(r => { const pct = r.target > 0 ? (r.have / r.target) * 100 : 0; %>
+        <div class="stat-row">
+          <span><%= r.label %></span>
+          <span><%= Math.round(r.have) %> / <%= Math.round(r.target) %> (<%= Math.round(Math.max(r.target - r.have, 0)) %> left)</span>
+        </div>
+        <div class="progress <%= pct > 100 ? 'over' : '' %>"><div style="width: <%= Math.min(pct, 100) %>%;"></div></div>
+      <% }) %>
+    </div>
+
+    <div class="card">
+      <h2>Log food</h2>
+      <form method="POST" action="/macros/entries">
+        <input type="hidden" name="date" value="<%= date %>">
+        <label>Name</label>
+        <input type="text" name="name" required placeholder="e.g. chicken breast + rice">
+        <div class="form-row">
+          <div><label>Calories</label><input type="number" step="1" name="calories" value="0"></div>
+          <div><label>Protein (g)</label><input type="number" step="0.1" name="protein" value="0"></div>
+          <div><label>Carbs (g)</label><input type="number" step="0.1" name="carbs" value="0"></div>
+          <div><label>Fat (g)</label><input type="number" step="0.1" name="fat" value="0"></div>
+        </div>
+        <button type="submit">Add entry</button>
+      </form>
+    </div>
+
+    <% if (favorites.length > 0) { %>
+      <div class="card">
+        <h2>Favorites</h2>
+        <% favorites.forEach(f => { %>
+          <div class="exercise-row">
+            <div style="flex:1;">
+              <strong><%= f.name %></strong>
+              <div class="muted"><%= f.calories %> kcal · <%= f.protein %>p / <%= f.carbs %>c / <%= f.fat %>f</div>
+            </div>
+            <form class="inline-form" method="POST" action="/macros/favorites/<%= f.id %>/use">
+              <input type="hidden" name="date" value="<%= date %>">
+              <button type="submit" class="secondary">Add</button>
+            </form>
+            <form class="inline-form" method="POST" action="/macros/favorites/<%= f.id %>/delete" onsubmit="return confirm('Delete this favorite?');">
+              <input type="hidden" name="date" value="<%= date %>">
+              <button type="submit" class="danger">✕</button>
+            </form>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <div class="card">
+      <h2>Save a favorite</h2>
+      <form method="POST" action="/macros/favorites">
+        <input type="hidden" name="date" value="<%= date %>">
+        <label>Name</label>
+        <input type="text" name="name" required placeholder="e.g. egg whites + whey">
+        <div class="form-row">
+          <div><label>Calories</label><input type="number" step="1" name="calories" value="0"></div>
+          <div><label>Protein (g)</label><input type="number" step="0.1" name="protein" value="0"></div>
+          <div><label>Carbs (g)</label><input type="number" step="0.1" name="carbs" value="0"></div>
+          <div><label>Fat (g)</label><input type="number" step="0.1" name="fat" value="0"></div>
+        </div>
+        <button type="submit" class="secondary">Save favorite</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Entries for <%= date %></h2>
+      <% if (entries.length === 0) { %><p class="muted">No entries logged.</p><% } %>
+      <table>
+        <tr><th>Name</th><th>Cal</th><th>P</th><th>C</th><th>F</th><th></th></tr>
+        <% entries.forEach(e => { %>
+          <tr>
+            <td><%= e.name %></td>
+            <td><%= Math.round(e.calories) %></td>
+            <td><%= e.protein %></td>
+            <td><%= e.carbs %></td>
+            <td><%= e.fat %></td>
+            <td>
+              <form method="POST" action="/macros/entries/<%= e.id %>/delete">
+                <input type="hidden" name="date" value="<%= date %>">
+                <button type="submit" class="danger">✕</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
