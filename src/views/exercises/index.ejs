@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'Exercises' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="container">
+    <h1>Exercise database</h1>
+    <p class="muted">Shared across all users. Add new exercises here; admins can edit, merge, or retire duplicates.</p>
+
+    <div class="card">
+      <form method="GET" action="/exercises" class="form-row">
+        <input type="text" name="q" placeholder="Search exercises…" value="<%= q %>">
+        <select name="category">
+          <option value="">All categories</option>
+          <% categories.forEach(c => { %>
+            <option value="<%= c %>" <%= category === c ? 'selected' : '' %>><%= c %></option>
+          <% }) %>
+        </select>
+        <button type="submit" class="secondary">Filter</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Add exercise</h2>
+      <form method="POST" action="/exercises">
+        <div class="form-row">
+          <div>
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div>
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+              <% categories.forEach(c => { %><option value="<%= c %>"><%= c %></option><% }) %>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="equipment">Equipment</label>
+            <input type="text" id="equipment" name="equipment" placeholder="barbell, dumbbell, machine…">
+          </div>
+          <div>
+            <label for="notes">Notes</label>
+            <input type="text" id="notes" name="notes" placeholder="optional">
+          </div>
+        </div>
+        <button type="submit">Add to shared database</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>All exercises (<%= exercises.length %>)</h2>
+      <table>
+        <tr><th>Name</th><th>Category</th><th>Equipment</th><% if (user.is_admin) { %><th></th><% } %></tr>
+        <% exercises.forEach(ex => { %>
+          <tr>
+            <td><%= ex.name %></td>
+            <td><span class="tag"><%= ex.category %></span></td>
+            <td class="muted"><%= ex.equipment || '—' %></td>
+            <% if (user.is_admin) { %>
+              <td>
+                <details>
+                  <summary class="muted" style="cursor:pointer;">Manage</summary>
+                  <form method="POST" action="/exercises/<%= ex.id %>/edit" style="margin-top:0.5rem;">
+                    <input type="text" name="name" value="<%= ex.name %>" required>
+                    <select name="category">
+                      <% categories.forEach(c => { %>
+                        <option value="<%= c %>" <%= ex.category === c ? 'selected' : '' %>><%= c %></option>
+                      <% }) %>
+                    </select>
+                    <input type="text" name="equipment" value="<%= ex.equipment || '' %>" placeholder="equipment">
+                    <input type="text" name="notes" value="<%= ex.notes || '' %>" placeholder="notes">
+                    <button type="submit" class="secondary">Save</button>
+                  </form>
+                  <form method="POST" action="/exercises/<%= ex.id %>/merge" style="margin-top:0.5rem;">
+                    <select name="target_id">
+                      <% exercises.filter(o => o.id !== ex.id).forEach(o => { %>
+                        <option value="<%= o.id %>"><%= o.name %></option>
+                      <% }) %>
+                    </select>
+                    <button type="submit" class="secondary">Merge into selected →</button>
+                  </form>
+                  <form method="POST" action="/exercises/<%= ex.id %>/deactivate" style="margin-top:0.5rem;">
+                    <button type="submit" class="danger">Deactivate</button>
+                  </form>
+                </details>
+              </td>
+            <% } %>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "fitness-track",
+  "version": "1.0.0",
+  "description": "Self-hosted fitness, macro, and workout tracker",
+  "private": true,
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "bcryptjs": "^2.4.3",
+    "chart.js": "^4.4.4",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "express-session": "^1.18.0"
+  }
+}

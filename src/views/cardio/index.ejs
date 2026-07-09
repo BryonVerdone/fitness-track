@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'Cardio' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="container">
+    <h1>Cardio</h1>
+
+    <div class="card">
+      <h2>Log session</h2>
+      <form method="POST" action="/cardio">
+        <div class="form-row">
+          <div>
+            <label>Type</label>
+            <select name="type" required>
+              <% types.forEach(t => { %><option value="<%= t %>"><%= t %></option><% }) %>
+            </select>
+          </div>
+          <div><label>Date</label><input type="date" name="date" value="<%= today %>"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Distance (mi)</label><input type="number" step="0.01" name="distance" required></div>
+          <div><label>Duration (min)</label><input type="number" step="0.1" name="duration_minutes" required></div>
+          <div><label>RPE (1–10)</label><input type="number" min="1" max="10" name="rpe"></div>
+        </div>
+        <label>Notes</label>
+        <input type="text" name="notes" placeholder="route, weather, how it felt…">
+        <button type="submit">Log</button>
+      </form>
+    </div>
+
+    <% if (weeklyMileage.length > 0) { %>
+      <div class="card">
+        <h2>Weekly mileage</h2>
+        <table>
+          <tr><th>Week of</th><th>Miles</th></tr>
+          <% weeklyMileage.slice(-8).reverse().forEach(w => { %>
+            <tr><td><%= w.week %></td><td><%= w.miles.toFixed(1) %></td></tr>
+          <% }) %>
+        </table>
+      </div>
+    <% } %>
+
+    <div class="card">
+      <h2>History</h2>
+      <% if (entries.length === 0) { %><p class="muted">No cardio sessions logged.</p><% } %>
+      <table>
+        <tr><th>Date</th><th>Type</th><th>Dist</th><th>Time</th><th>Pace/Speed</th><th>RPE</th><th></th></tr>
+        <% entries.forEach(e => { %>
+          <tr>
+            <td class="muted"><%= e.date %></td>
+            <td><%= e.type %></td>
+            <td><%= e.distance %> mi</td>
+            <td><%= Math.floor(e.duration_seconds/60) %>:<%= String(e.duration_seconds%60).padStart(2,'0') %></td>
+            <td>
+              <% if (e.type === 'run' || e.type === 'walk') { %>
+                <%= e.pace ? e.pace.toFixed(2) + ' min/mi' : '—' %>
+              <% } else { %>
+                <%= e.speed ? e.speed.toFixed(1) + ' mph' : '—' %>
+              <% } %>
+            </td>
+            <td><%= e.rpe || '—' %></td>
+            <td>
+              <details>
+                <summary class="muted" style="cursor:pointer;">Edit</summary>
+                <form method="POST" action="/cardio/<%= e.id %>" style="margin-top:0.5rem;min-width:220px;">
+                  <select name="type">
+                    <% types.forEach(t => { %><option value="<%= t %>" <%= t===e.type?'selected':'' %>><%= t %></option><% }) %>
+                  </select>
+                  <input type="date" name="date" value="<%= e.date %>">
+                  <input type="number" step="0.01" name="distance" value="<%= e.distance %>">
+                  <input type="number" step="0.1" name="duration_minutes" value="<%= (e.duration_seconds/60).toFixed(1) %>">
+                  <input type="number" min="1" max="10" name="rpe" value="<%= e.rpe || '' %>">
+                  <input type="text" name="notes" value="<%= e.notes || '' %>">
+                  <button type="submit" class="secondary">Save</button>
+                </form>
+                <form method="POST" action="/cardio/<%= e.id %>/delete" onsubmit="return confirm('Delete this entry?');">
+                  <button type="submit" class="danger">Delete</button>
+                </form>
+              </details>
+              <% if (e.notes) { %><div class="muted"><%= e.notes %></div><% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

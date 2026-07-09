@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'Macro targets' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="container">
+    <h1>Macro targets</h1>
+    <p class="muted">Two profiles — toggle which applies per day from the <a href="/macros">Macros</a> page.</p>
+
+    <div class="card">
+      <h2>Training day</h2>
+      <form method="POST" action="/macros/targets">
+        <input type="hidden" name="profile" value="training">
+        <div class="form-row">
+          <div><label>Calories</label><input type="number" name="calories" value="<%= training ? training.calories : 2000 %>"></div>
+          <div><label>Protein (g)</label><input type="number" name="protein" value="<%= training ? training.protein : 150 %>"></div>
+          <div><label>Carbs (g)</label><input type="number" name="carbs" value="<%= training ? training.carbs : 200 %>"></div>
+          <div><label>Fat (g)</label><input type="number" name="fat" value="<%= training ? training.fat : 65 %>"></div>
+        </div>
+        <button type="submit">Save</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Rest day</h2>
+      <form method="POST" action="/macros/targets">
+        <input type="hidden" name="profile" value="rest">
+        <div class="form-row">
+          <div><label>Calories</label><input type="number" name="calories" value="<%= rest ? rest.calories : 1800 %>"></div>
+          <div><label>Protein (g)</label><input type="number" name="protein" value="<%= rest ? rest.protein : 150 %>"></div>
+          <div><label>Carbs (g)</label><input type="number" name="carbs" value="<%= rest ? rest.carbs : 150 %>"></div>
+          <div><label>Fat (g)</label><input type="number" name="fat" value="<%= rest ? rest.fat : 65 %>"></div>
+        </div>
+        <button type="submit">Save</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

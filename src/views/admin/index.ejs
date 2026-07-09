@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'Admin' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="container">
+    <h1>Admin</h1>
+
+    <div class="card">
+      <h2>Users</h2>
+      <table>
+        <tr><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th></th></tr>
+        <% users.forEach(u => { %>
+          <tr>
+            <td><%= u.username %></td>
+            <td><%= u.email %></td>
+            <td><%= u.is_admin ? 'Admin' : 'User' %></td>
+            <td><%= u.is_active ? 'Active' : 'Deactivated' %></td>
+            <td class="muted"><%= u.created_at %></td>
+            <td>
+              <% if (u.id !== user.id) { %>
+                <% if (u.is_active) { %>
+                  <form class="inline-form" method="POST" action="/admin/users/<%= u.id %>/deactivate">
+                    <button class="danger" type="submit">Deactivate</button>
+                  </form>
+                <% } else { %>
+                  <form class="inline-form" method="POST" action="/admin/users/<%= u.id %>/activate">
+                    <button class="secondary" type="submit">Activate</button>
+                  </form>
+                <% } %>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Invites</h2>
+      <form method="POST" action="/admin/invites">
+        <button type="submit">Generate invite link</button>
+      </form>
+      <table>
+        <tr><th>Link</th><th>Status</th><th>Used by</th><th></th></tr>
+        <% invites.forEach(i => { %>
+          <tr>
+            <td class="muted" style="word-break:break-all;">/register/<%= i.code %></td>
+            <td>
+              <% if (i.revoked) { %>Revoked
+              <% } else if (i.used_by) { %>Used
+              <% } else { %>Open<% } %>
+            </td>
+            <td><%= i.used_by_username || '—' %></td>
+            <td>
+              <% if (!i.revoked && !i.used_by) { %>
+                <form class="inline-form" method="POST" action="/admin/invites/<%= i.id %>/revoke">
+                  <button class="danger" type="submit">Revoke</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

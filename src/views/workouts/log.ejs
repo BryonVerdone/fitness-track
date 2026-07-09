@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: workout.name }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="container">
+    <h1><%= workout.name %></h1>
+
+    <div class="card">
+      <form method="POST" action="/workouts/<%= workout.id %>">
+        <div class="form-row">
+          <div>
+            <label>Name</label>
+            <input type="text" name="name" value="<%= workout.name %>">
+          </div>
+          <div>
+            <label>Date</label>
+            <input type="date" name="performed_at" value="<%= workout.performed_at.slice(0,10) %>">
+          </div>
+        </div>
+        <label>Notes</label>
+        <textarea name="notes" rows="2"><%= workout.notes || '' %></textarea>
+        <button type="submit" class="secondary">Save</button>
+      </form>
+      <form method="POST" action="/workouts/<%= workout.id %>/delete" onsubmit="return confirm('Delete this whole workout?');">
+        <button type="submit" class="danger">Delete workout</button>
+      </form>
+    </div>
+
+    <% exercisesWithSets.forEach(we => { %>
+      <div class="card">
+        <div class="exercise-row">
+          <strong style="flex:1;"><%= we.exercise_name %></strong>
+          <span class="tag"><%= we.category %></span>
+        </div>
+        <% if (we.target) { %>
+          <p class="muted">Target: <%= we.target.target_sets %> × <%= we.target.target_rep_low || '?' %>–<%= we.target.target_rep_high || '?' %><%= we.target.notes ? ' · ' + we.target.notes : '' %></p>
+        <% } %>
+        <% if (we.prev) { %>
+          <p class="prev-hint">Last time (<%= we.prev.performed_at.slice(0,10) %>):
+            <% we.prev.sets.forEach((s, i) => { %>
+              <%= i > 0 ? ', ' : '' %><%= s.weight ?? '—' %>×<%= s.reps ?? '—' %>
+            <% }) %>
+          </p>
+        <% } %>
+
+        <% we.sets.forEach(s => { %>
+          <form class="set-row" method="POST" action="/workouts/<%= workout.id %>/sets/<%= s.id %>">
+            <span class="set-label">#<%= s.set_index + 1 %></span>
+            <input type="number" step="0.5" name="weight" placeholder="weight" value="<%= s.weight ?? '' %>">
+            <input type="number" name="reps" placeholder="reps" value="<%= s.reps ?? '' %>">
+            <button type="submit" class="secondary">Save</button>
+            <button type="submit" formaction="/workouts/<%= workout.id %>/sets/<%= s.id %>/delete" class="danger">✕</button>
+          </form>
+        <% }) %>
+
+        <form class="set-row" method="POST" action="/workouts/<%= workout.id %>/exercises/<%= we.id %>/sets">
+          <span class="set-label">#<%= we.sets.length + 1 %></span>
+          <input type="number" step="0.5" name="weight" placeholder="weight">
+          <input type="number" name="reps" placeholder="reps">
+          <button type="submit">Add set</button>
+        </form>
+
+        <details style="margin-top:0.5rem;">
+          <summary class="muted" style="cursor:pointer;">Swap exercise</summary>
+          <form method="POST" action="/workouts/<%= workout.id %>/exercises/<%= we.id %>/swap" style="margin-top:0.5rem;">
+            <select name="exercise_id">
+              <% allExercises.forEach(ex => { %>
+                <option value="<%= ex.id %>" <%= ex.id === we.exercise_id ? 'selected' : '' %>><%= ex.name %> (<%= ex.category %>)</option>
+              <% }) %>
+            </select>
+            <button type="submit" class="secondary">Swap</button>
+          </form>
+        </details>
+        <form method="POST" action="/workouts/<%= workout.id %>/exercises/<%= we.id %>/delete" onsubmit="return confirm('Remove this exercise from the workout?');" style="margin-top:0.5rem;">
+          <button type="submit" class="danger">Remove exercise</button>
+        </form>
+      </div>
+    <% }) %>
+
+    <div class="card">
+      <h2>Add exercise</h2>
+      <form method="POST" action="/workouts/<%= workout.id %>/exercises">
+        <select name="exercise_id" required>
+          <% allExercises.forEach(ex => { %>
+            <option value="<%= ex.id %>"><%= ex.name %> (<%= ex.category %>)</option>
+          <% }) %>
+        </select>
+        <button type="submit">Add</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

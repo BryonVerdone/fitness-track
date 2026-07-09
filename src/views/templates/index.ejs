@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'Templates' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <div class="container">
+    <h1>Workout templates</h1>
+
+    <div class="card">
+      <h2>New template</h2>
+      <form method="POST" action="/templates" class="form-row">
+        <input type="text" name="name" placeholder="e.g. Gym Upper" required>
+        <button type="submit">Create</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <% if (templates.length === 0) { %>
+        <p class="muted">No templates yet.</p>
+      <% } %>
+      <% templates.forEach(t => { %>
+        <div class="exercise-row">
+          <strong style="flex:1;"><%= t.name %></strong>
+          <a class="btn secondary" href="/templates/<%= t.id %>/edit">Edit</a>
+          <a class="btn" href="/workouts/start/<%= t.id %>">Start workout</a>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</body>
+</html>
